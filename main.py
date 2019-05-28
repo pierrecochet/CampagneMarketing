@@ -1,6 +1,3 @@
-from datetime import time
-
-#from testGetAll import initiateDb
 import model
 from api import API
 from database import DataBase
