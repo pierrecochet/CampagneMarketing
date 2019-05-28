@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import tweepy
 import csv
-from database2 import *
+from database import *
 import mysql.connector
 
 mydb = mysql.connector.connect(
@@ -35,7 +35,7 @@ def get_followers(user_name):
     """
     api = tweepy.API(auth)
     followers = []
-    for page in tweepy.Cursor(api.followers, screen_name=user_name, wait_on_rate_limit=True,count=10).pages(1):
+    for page in tweepy.Cursor(api.followers, screen_name=user_name, wait_on_rate_limit=True,count=20).pages(1):
     #for page in tweepy.Cursor(api.followers, screen_name=user_name).pages(2):
         try:
             followers.extend(page)
@@ -45,22 +45,7 @@ def get_followers(user_name):
     return followers
 
 
-def save_followers_to_csv(user_name, data):
-    """
-    saves json data to csv
-    :param data: data recieved from twitter
-    :return: None
-    """
-    HEADERS = ["name", "screen_name"]
-    with open(user_name + "_followers.csv", 'w',encoding="utf-8") as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(HEADERS)
-        for profile_data in data:
-            profile = []
-            for header in HEADERS:
-                profile.append(profile_data._json[header])
-                print(profile_data._json[header])
-            csv_writer.writerow(profile)
+
 
 
 

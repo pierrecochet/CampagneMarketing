@@ -8,8 +8,8 @@ import tweepy
 import logging
 import csv
 import time
-from testGetAll import *
-from database2 import DataBase
+from model import *
+from database import DataBase
 
 try:
     import json

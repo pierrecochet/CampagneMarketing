@@ -1,9 +1,9 @@
 from datetime import time
 
 #from testGetAll import initiateDb
-import testGetAll
+import model
 from api import API
-from database2 import DataBase
+from database import DataBase
 import threading
 from frequences import Frequences
 
@@ -11,7 +11,7 @@ if __name__ == '__main__':
     db = DataBase()
     account_screen_name = "_agricool"
     # pour s'assurer que la bdd est remplie avant de regarder les pics d'activités
-    thread = threading.Thread(target=testGetAll.initiateDb(db,account_screen_name))
+    thread = threading.Thread(target=model.initiateDb(db, account_screen_name))
     thread.start()
     thread.join()
     TwitterAPI=API("_agricool")
