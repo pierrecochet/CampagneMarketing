@@ -1,3 +1,5 @@
+import threading
+
 import follower
 import tokenizer
 import tweet
@@ -7,6 +9,7 @@ import logging
 import csv
 import time
 from testGetAll import *
+from database2 import DataBase
 
 try:
     import json
@@ -23,10 +26,10 @@ from datetime import datetime, timedelta
 #CONSUMER_KEY = 'nazYTA9BgmjpZSB54whfr4gkF'
 #CONSUMER_SECRET = 'zOm049TtpKJ4zc36gqD3XV8xl4SYSvQJCz1AygEbDK0BVt5v37'
 
-ACCESS_TOKEN = '818456674507902977-CweXH1SJkOeyKLAc1EUnZ2JKSHpC83Z'
-ACCESS_SECRET = "kLla8weNLy1tfEdwEIlUmz9g1tV91sO7VHE5dOhyrYLsL"
-CONSUMER_KEY = "cZQqU0bI8Du4OAr3vqZFGH17C"
-CONSUMER_SECRET = "JuFRZeTaWVG48GYALBRDuaJHJr5LQVqBsFyDyyDxaUVYhu0rMz"
+#ACCESS_TOKEN = '818456674507902977-CweXH1SJkOeyKLAc1EUnZ2JKSHpC83Z'
+#ACCESS_SECRET = "kLla8weNLy1tfEdwEIlUmz9g1tV91sO7VHE5dOhyrYLsL"
+#CONSUMER_KEY = "cZQqU0bI8Du4OAr3vqZFGH17C"
+#CONSUMER_SECRET = "JuFRZeTaWVG48GYALBRDuaJHJr5LQVqBsFyDyyDxaUVYhu0rMz"
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
@@ -38,51 +41,14 @@ auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 class API :
     def __init__(self,idAccount):
         self.idAccount = idAccount
-        #self.FollowersIDs = self.getFollowersIDs(idAccount)
         self.listFollowers = self.getlistFollowers()
 
-    #def getFollowersIDs(self, idAccount):
-    #    """
-    #    :param idAccount: La compte dont on souhaite récupérer les followers
-    #    :return: Une liste des followers d'un compte
-    #    """
-    #    listIDs = []
-    #    for ids in tweepy.Cursor(api.followers_ids, id=idAccount).items(0):
-    #        listIDs.append(ids)
-    #    return listIDs
-
-    #def getlistFollowers(self):
-    #    ids = self.FollowersIDs
-    #    listFollowers = []
-    #    for i in range(len(ids)):
-    #        # Pour chaque follower sélectionné
-    #        for status in tweepy.Cursor(api.user_timeline, screen_name=api.get_user(ids[i]).screen_name,tweet_mode='extended').items(0):
-    #            # On parcoure ces 2 derniers tweets pour récupérer les infos suivantes :
-    #            soloTweet = status._json
-    #            date = self.setDateT(soloTweet['created_at'])  # On calcule et on stocke la date du tweet
-    #            content = soloTweet['full_text']  # On stocke le contenu du tweet
-    #            screen_name = api.get_user(ids[i]).screen_name # On stocke le screen_name de propriétaire du tweet
-    #            res = self.indexFollower(listFollowers, ids[i])
-    #
-    #            if next(iter(res)):
-    #                # Si on ne connait pas le follower :
-    #                listFollowers.append(follower.Follower(ids[i], screen_name))
-    #                # On crée et on ajoute le follower
-    #                listFollowers[res[True]].addTweet(tweet.Tweet(date, content, tokenizer.getWeight(content)))
-    #                # On crée et on ajoute le tweet
-    #            else:
-    #                # Si on connait pas follower :
-    #                listFollowers[res[False]].addTweet(tweet.Tweet(date, content, tokenizer.getWeight(content)))
-    #                # On crée et on ajoute le tweet
-    #
-    #    return listFollowers
 
     def getlistFollowers(self):
         db = DataBase()
         followers = db.getFollowersdb()
         listFollowers = []
         for fol in followers :
-            print("oui"+fol[1])
             tweets = db.getTweetsdb(fol[0])#follower[0]=id du follower
             for tweetSolo in tweets:
                 res = self.indexFollower(listFollowers, fol[0])
@@ -118,9 +84,22 @@ class API :
         d = d + timedelta(hours=1)
         return d
 
-TwitterAPI = API("_agricool")
-for f in TwitterAPI.listFollowers:
-    print(f.screen_name)
+    def traitementListe(self):
+        db = DataBase()
+        for follower in self.listFollowers:
+            thread = threading.Thread(target=follower.updateWeightFollower())
+            thread.start()
+            thread.join()
+            db.updateWeightF(follower.idF, follower.weight)
+        self.listFollowers.sort(key=lambda follower: follower.weight, reverse=True)
+
+#for follower in TwitterAPI.listFollowers:
+    #follower.updateWeightFollower()
+    #db.updateWeightF(follower.idF, follower.weight)
+#TwitterAPI.listFollowers.sort(key=lambda follower: follower.weight, reverse=True)
+
+
+
 
 ##########################################################################################
 
@@ -180,5 +159,3 @@ for f in TwitterAPI.listFollowers:
 #TweetdataCSV.writeTweetCSV()
 
 ##########################################################################################
-
-

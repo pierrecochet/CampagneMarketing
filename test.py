@@ -20,10 +20,10 @@ CONSUMER_KEY = 'qFBm7PP8yvBO87EuvGCmQ'
 CONSUMER_SECRET = 'UrVAZEPoFtcFNh20ilEae18yjQ2MdnH44Dz2wtpsKk'
 """
 
-ACCESS_TOKEN = '1092775756990742528-f3jdO4dHk6mz74xelnaIR5DanAWPm6'
-ACCESS_SECRET = 'ajiXNmSln042ivtOOTh9GYkh0vcJNZwiQAmZMuf6sRCtB'
-CONSUMER_KEY = 'nazYTA9BgmjpZSB54whfr4gkF'
-CONSUMER_SECRET = 'zOm049TtpKJ4zc36gqD3XV8xl4SYSvQJCz1AygEbDK0BVt5v37'
+ACCESS_TOKEN = '1092775756990742528-P8nXtZHBbeHYswqC7frHyNjqq3FK4l'
+ACCESS_SECRET = 'nui0bVJpTJTIz9KfmIqAgqN3G1hjVRYGGj4NBkTSyq9C8'
+CONSUMER_KEY = 'SMjIKcwMnReu15Hp6XzalL45U'
+CONSUMER_SECRET = 'Mb46UEuT390OVtwIZVPLzySS2S6gmPzOzrvnipvEyfE534yIwz'
 
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -92,9 +92,10 @@ def getlistFollowers(ids):
     listFollowers=[]
     for i in range(len(ids)):
     # Pour chaque follower sélectionné
-        for status in tweepy.Cursor(api.user_timeline, screen_name=api.get_user(ids[i]).screen_name, tweet_mode='extended').items(2):
+        for status in tweepy.Cursor(api.user_timeline, screen_name=api.get_user(ids[i]).screen_name, tweet_mode='extended').items():
             # On parcoure ces 2 derniers tweets pour récupérer les infos suivantes :
             tweetFeed = status._json
+            print(tweetFeed)
             date = setDateT(tweetFeed['created_at']) # when the tweet posted
             content = tweetFeed['full_text'] # content of the tweet
             screen_name = api.get_user(ids[i]).screen_name

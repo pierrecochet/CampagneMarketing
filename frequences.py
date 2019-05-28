@@ -1,5 +1,12 @@
+import datetime
+
+
+
 class Frequences :
-    #def __init__(self):
+    def __init__(self,TwitterAPI):
+        self.ActiviteParHeure = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.sommeActivite = 0
+        self.TwitterAPI=TwitterAPI
         #self.ActivitesParHeure = self.calculActiviteHoraire()
         # Un tableau contenant 24 cases qui renseigne sur l'activité des followers sur chaque heure pendant 1 jour
         #self.ActivitesParHeure = [336]
@@ -22,8 +29,9 @@ class Frequences :
         :return: rien
         """
         ActivitesParHeure = []
-        for follower in TwitterAPI.listFollowers:
+        for follower in self.TwitterAPI.listFollowers:
             for tweet in follower.listTweets:
+                print(tweet)
                 heure = int(tweet.date[11:13])
                 ActivitesParHeure [heure]+=1
 
@@ -49,56 +57,73 @@ class Frequences :
         return numHour%24+1
 
     def pourcentageActivite(self,hmax):
-        return (ActiviteParHeure[hmax] / sommeActivite)*100
+        if self.sommeActivite != 0:
+            return (self.ActiviteParHeure[hmax] / self.sommeActivite)*100
+        else:
+            return 0
 
-freq1= Frequences()
+    def setWeekActivity(self,ListeDActivites1):
+        for activite in ListeDActivites1:
+            a = activite[0]*24+activite[1]
+            self.ActiviteParHeure[a]+=1
 
-"""
-On a une liste de date on cherche les pics:
+    def getListActivite(self) :
+        ListeDActivites1 = []
+        for follower in self.TwitterAPI.listFollowers:
+            for tweet in follower.listTweets :
+                ListeDActivites1.append([int(tweet.date.weekday()),int(tweet.date.hour)])
+        return ListeDActivites1
 
-On regarde les heures qui reviennent le plus 
-"""
+    def getActivity(self):
 
-ListeDActivites = [[2, 19], [4, 18], [0, 3], [4, 12], [1, 17], [2, 18], [5, 19], [3, 20], [6, 12], [4, 22], [3, 17], [4, 22], [2, 1], [3, 2], [4, 11], [2, 14], [1, 16], [2, 19], [2, 18], [4, 19], [3, 17], [2, 19], [2, 16], [6, 20], [0, 20]]
-ActiviteParHeure = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-#def setWeekActivite() :
-
-for activite in ListeDActivites:
-    a = activite[0]*24+activite[1]
-    ActiviteParHeure[a]+=1
-
-sommeActivite = float(sum(ActiviteParHeure))
-
-
-for i in range(5):
-    hmax = ActiviteParHeure.index(max(ActiviteParHeure))
-    print(freq1.pourcentageActivite(hmax), "% :",freq1.nToWeekDay(hmax), "(", freq1.hBefore(hmax), "-", freq1.hAfter(hmax), "))")
-    del ActiviteParHeure[hmax]
-
-
-hmax1 = ActiviteParHeure.index(max(ActiviteParHeure))
-print("\nLa période d'activité maximale est le", freq1.nToWeekDay(hmax1), "entre", freq1.hBefore(hmax1), "h et", freq1.hAfter(hmax1), "h.")
-print("La semaine dernière, cette période représentait", freq1.pourcentageActivite(hmax1),"% de l'activité de vos Followers.")
+        """
+        On a une liste de date on cherche les pics:
+        
+        On regarde les heures qui reviennent le plus 
+        """
 
 
 
-del ActiviteParHeure[hmax1]
-hmax2 = ActiviteParHeure.index(max(ActiviteParHeure))
-print("\nLa période d'activité maximale est le", freq1.nToWeekDay(hmax2), "entre", freq1.hBefore(hmax2), "h et", freq1.hAfter(hmax2), "h.")
-print("La semaine dernière, cette période représentait", freq1.pourcentageActivite(hmax2),"% de l'activité de vos Followers.")
 
-del ActiviteParHeure[hmax2]
-hmax3 = ActiviteParHeure.index(max(ActiviteParHeure))
-print("\nLa période d'activité maximale est le", freq1.nToWeekDay(hmax3), "entre", freq1.hBefore(hmax3), "h et", freq1.hAfter(hmax3), "h.")
-print("La semaine dernière, cette période représentait", freq1.pourcentageActivite(hmax3),"% de l'activité de vos Followers.")
+        ListeDActivites1 = self.getListActivite()
 
-del ActiviteParHeure[hmax3]
-hmax4 = ActiviteParHeure.index(max(ActiviteParHeure))
-print("\nLa période d'activité maximale est le", freq1.nToWeekDay(hmax4), "entre", freq1.hBefore(hmax4), "h et", freq1.hAfter(hmax4), "h.")
-print("La semaine dernière, cette période représentait", freq1.pourcentageActivite(hmax4),"% de l'activité de vos Followers.")
 
-del ActiviteParHeure[hmax4]
-hmax5 = ActiviteParHeure.index(max(ActiviteParHeure))
-print("\nLa période d'activité maximale est le", freq1.nToWeekDay(hmax5), "entre", freq1.hBefore(hmax5), "h et", freq1.hAfter(hmax5), "h.")
-print("La semaine dernière, cette période représentait", freq1.pourcentageActivite(hmax5),"% de l'activité de vos Followers.")
+
+        self.setWeekActivity(ListeDActivites1)
+
+        self.sommeActivite = float(sum(self.ActiviteParHeure))
+
+
+
+        for i in range(6):
+            hmax = self.ActiviteParHeure.index(max(self.ActiviteParHeure))
+            print(self.pourcentageActivite(hmax), "% :",self.nToWeekDay(hmax), "(", self.hBefore(hmax), "-", self.hAfter(hmax), "))")
+            del self.ActiviteParHeure[hmax]
+
+
+        hmax1 = self.ActiviteParHeure.index(max(self.ActiviteParHeure))
+        print("\nLa période d'activité maximale est le", self.nToWeekDay(hmax1), "entre", self.hBefore(hmax1), "h et", self.hAfter(hmax1), "h.")
+        print("La semaine dernière, cette période représentait", self.pourcentageActivite(hmax1),"% de l'activité de vos Followers.")
+
+
+
+        del self.ActiviteParHeure[hmax1]
+        hmax2 = self.ActiviteParHeure.index(max(self.ActiviteParHeure))
+        print("\nLa période d'activité maximale est le", self.nToWeekDay(hmax2), "entre", self.hBefore(hmax2), "h et", self.hAfter(hmax2), "h.")
+        print("La semaine dernière, cette période représentait", self.pourcentageActivite(hmax2),"% de l'activité de vos Followers.")
+
+        del self.ActiviteParHeure[hmax2]
+        hmax3 = self.ActiviteParHeure.index(max(self.ActiviteParHeure))
+        print("\nLa période d'activité maximale est le", self.nToWeekDay(hmax3), "entre", self.hBefore(hmax3), "h et", self.hAfter(hmax3), "h.")
+        print("La semaine dernière, cette période représentait", self.pourcentageActivite(hmax3),"% de l'activité de vos Followers.")
+
+        del self.ActiviteParHeure[hmax3]
+        hmax4 = self.ActiviteParHeure.index(max(self.ActiviteParHeure))
+        print("\nLa période d'activité maximale est le", self.nToWeekDay(hmax4), "entre", self.hBefore(hmax4), "h et", self.hAfter(hmax4), "h.")
+        print("La semaine dernière, cette période représentait", self.pourcentageActivite(hmax4),"% de l'activité de vos Followers.")
+
+        del self.ActiviteParHeure[hmax4]
+        hmax5 = self.ActiviteParHeure.index(max(self.ActiviteParHeure))
+        print("\nLa période d'activité maximale est le", self.nToWeekDay(hmax5), "entre", self.hBefore(hmax5), "h et", self.hAfter(hmax5), "h.")
+        print("La semaine dernière, cette période représentait", self.pourcentageActivite(hmax5),"% de l'activité de vos Followers.")
+

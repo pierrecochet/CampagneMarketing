@@ -83,5 +83,11 @@ class DataBase :
         records = self.mycursor.fetchall()
         return records
 
+    def updateWeightF(self, idF, weight):
+        updateTableFollower = "UPDATE follower SET weight = %s WHERE idF = %s"
+        args = (weight, idF)
+        self.mycursor.execute(updateTableFollower, args)
+        mydb.commit()
 
- # Constuit la DataBase
+
+# Constuit la DataBase

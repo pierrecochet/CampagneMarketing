@@ -13,10 +13,15 @@ mydb = mysql.connector.connect(
     database='twitterdb')
 mycursor = mydb.cursor()
 
-ACCESS_TOKEN = '1092775756990742528-f3jdO4dHk6mz74xelnaIR5DanAWPm6'
-ACCESS_SECRET = 'ajiXNmSln042ivtOOTh9GYkh0vcJNZwiQAmZMuf6sRCtB'
-CONSUMER_KEY = 'nazYTA9BgmjpZSB54whfr4gkF'
-CONSUMER_SECRET = 'zOm049TtpKJ4zc36gqD3XV8xl4SYSvQJCz1AygEbDK0BVt5v37'
+#ACCESS_TOKEN = '1092775756990742528-f3jdO4dHk6mz74xelnaIR5DanAWPm6'
+#ACCESS_SECRET = 'ajiXNmSln042ivtOOTh9GYkh0vcJNZwiQAmZMuf6sRCtB'
+#CONSUMER_KEY = 'nazYTA9BgmjpZSB54whfr4gkF'
+#CONSUMER_SECRET = 'zOm049TtpKJ4zc36gqD3XV8xl4SYSvQJCz1AygEbDK0BVt5v37'
+
+ACCESS_TOKEN = '818456674507902977-CweXH1SJkOeyKLAc1EUnZ2JKSHpC83Z'
+ACCESS_SECRET = 'kLla8weNLy1tfEdwEIlUmz9g1tV91sO7VHE5dOhyrYLsL'
+CONSUMER_KEY = 'cZQqU0bI8Du4OAr3vqZFGH17C'
+CONSUMER_SECRET = 'JuFRZeTaWVG48GYALBRDuaJHJr5LQVqBsFyDyyDxaUVYhu0rMz'
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
@@ -30,7 +35,7 @@ def get_followers(user_name):
     """
     api = tweepy.API(auth)
     followers = []
-    for page in tweepy.Cursor(api.followers, screen_name=user_name, wait_on_rate_limit=True,count=200).pages():
+    for page in tweepy.Cursor(api.followers, screen_name=user_name, wait_on_rate_limit=True,count=10).pages(1):
     #for page in tweepy.Cursor(api.followers, screen_name=user_name).pages(2):
         try:
             followers.extend(page)
@@ -75,19 +80,14 @@ def save_followers_to_db(user_name, data,db):
 
 def insertTweet(db):
     records = db.getFollowersdb()
-    api = tweepy.API(auth)
     followers = []
-    i =0
     for row in records:
-        if (i>100):
-            break
         tweets = getTweetsFollower(row[0])
         for tweet in tweets:
             soloTweet = tweet._json
             date = setDateT(soloTweet['created_at'])  # On calcule et on stocke la date du tweet
             content = soloTweet['full_text']
             db.insertTweetdb(row[0],date,content)
-        i+=1
 
 
 
@@ -95,12 +95,15 @@ def insertTweet(db):
 def getTweetsFollower(followerId):
     tweets = []
     api = tweepy.API(auth)
-    for status in tweepy.Cursor(api.user_timeline, screen_name=api.get_user(followerId).screen_name,tweet_mode="extended").items(3):
-        try:
-            tweets.append(status)
-        except tweepy.TweepError as e:
-            print("Going to sleep:", e)
-            time.sleep(60)
+    try:#certains comptes sont protected du coup ça plante quand on veut prendre les tweets du coup il faut faire un try catch
+        for status in tweepy.Cursor(api.user_timeline, screen_name=api.get_user(followerId).screen_name,tweet_mode="extended").items(2):
+            try:
+                tweets.append(status)
+            except tweepy.TweepError as e:
+                print("Going to sleep:", e)
+                time.sleep(60)
+    except tweepy.TweepError:
+        print("protected account")
     return tweets
 #!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DELETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -120,6 +123,11 @@ def setDateT(dateTweet):
     return d
 
 
+def initiateDb(db,account):
+    followers = get_followers(account)
+    save_followers_to_db(account, followers,db)
+    insertTweet(db)
+
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DELETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -127,6 +135,4 @@ if __name__ == '__main__':
 
     db= DataBase()
 
-    followers = get_followers("_agricool")
-    save_followers_to_db("_agricool", followers,db)
-    insertTweet(db)
+    initiateDb(db,"_agricool")
